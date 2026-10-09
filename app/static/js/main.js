@@ -254,6 +254,14 @@ document.addEventListener("DOMContentLoaded", () => {
       } else {
         dbStatus.innerHTML = `<span style="color: #fbbf24;">⚠ Database offline: ${data.save_error || "unreachable"}</span>`;
       }
+    // Update Financial Revenue Impact
+    const revElem = document.getElementById("revenueAtRisk");
+    const saveElem = document.getElementById("retentionSavings");
+    if (revElem && data.financial_impact) {
+      revElem.textContent = `$${parseFloat(data.financial_impact.annual_revenue_at_risk || 0).toFixed(2)}`;
+    }
+    if (saveElem && data.financial_impact) {
+      saveElem.textContent = `$${parseFloat(data.financial_impact.simulated_retention_savings || 0).toFixed(2)}`;
     }
 
     // Render Factor Drivers

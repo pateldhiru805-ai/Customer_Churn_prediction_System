@@ -219,6 +219,12 @@ def predict_one(data: Dict[str, Any], threshold: Optional[float] = None) -> Dict
     risk_factors = derive_risk_factors(data, prob_churn)
     recommendations = generate_retention_recommendations(data, risk_level)
 
+    # 6. Financial & Revenue Impact
+    monthly = float(data.get("MonthlyCharges", 0.0))
+    annual_rev_at_risk = round(monthly * 12.0 * prob_churn, 2)
+    projected_annual = round(monthly * 12.0, 2)
+    simulated_savings = round(annual_rev_at_risk * 0.55, 2) if is_churn else 0.0
+
     return {
         "prediction": label,
         "churn_probability": round(prob_churn, 4),
@@ -229,4 +235,9 @@ def predict_one(data: Dict[str, Any], threshold: Optional[float] = None) -> Dict
         "model_version": metadata.get("model_version", "1.0.0"),
         "risk_factors": risk_factors,
         "retention_actions": recommendations,
+        "financial_impact": {
+            "annual_revenue_at_risk": annual_rev_at_risk,
+            "projected_annual_value": projected_annual,
+            "simulated_retention_savings": simulated_savings,
+        },
     }

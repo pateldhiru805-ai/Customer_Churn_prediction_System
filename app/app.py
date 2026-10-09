@@ -118,6 +118,7 @@ def api_predict():
             "model_version": result["model_version"],
             "risk_factors": result["risk_factors"],
             "retention_actions": result["retention_actions"],
+            "financial_impact": result.get("financial_impact", {}),
         }
         return jsonify(response_data), 200
 
