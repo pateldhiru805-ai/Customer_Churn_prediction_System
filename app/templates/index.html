@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Customer Churn Prediction System | AI Workbench</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <!-- Top Navigation -->
+  <nav class="navbar">
+    <a href="/" class="brand">
+      <span class="brand-badge">PROD ML</span>
+      <span>ChurnGuard AI</span>
+    </a>
+    <div class="nav-links">
+      <a href="/" class="nav-link active">Simulator</a>
+      <a href="#batch" class="nav-link">Batch Analysis</a>
+      <a href="/history" class="nav-link">Prediction History</a>
+      <a href="#metrics" class="nav-link">Model Metrics</a>
+      <div class="health-pill">
+        <span class="health-dot"></span>
+        <span>Engine Active (v{{ metadata.get('model_version', '1.0.0') }})</span>
+      </div>
+    </div>
+  </nav>
+
+  <div class="main-content">
+
+    <!-- Top KPI Cards -->
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-title">Monitored Portfolio</div>
+        <div class="kpi-value">{{ metadata.get('dataset_rows', 7043) | int }}</div>
+        <div class="kpi-subtitle">Telco Customer Accounts</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-title">Production Model</div>
+        <div class="kpi-value" style="font-size: 1.35rem; color: #a5b4fc;">{{ metadata.get('model_name', 'Gradient Boosting') }}</div>
+        <div class="kpi-subtitle">Optimal Threshold: {{ metadata.get('optimal_threshold', 0.359) }}</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-title">Model ROC-AUC</div>
+        <div class="kpi-value" style="color: #34d399;">
+          {{ (metadata.get('test_metrics', {}).get('roc_auc', 0.8441) * 100) | round(1) }}%
+        </div>
+        <div class="kpi-subtitle">Test Set Discriminative Power</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-title">Portfolio Churn Baseline</div>
+        <div class="kpi-value" style="color: #fbbf24;">26.5%</div>
+        <div class="kpi-subtitle">Historical Imbalance Ratio</div>
+      </div>
+    </div>
+
+    <!-- Quick Load Presets -->
+    <div class="presets-bar">
+      <span class="presets-label">⚡ Quick Presets:</span>
+      <button type="button" class="preset-btn" onclick="loadPreset('highRisk')">🔥 High-Risk Newbie</button>
+      <button type="button" class="preset-btn" onclick="loadPreset('fiberAtRisk')">⚠️ Fiber Optic At-Risk</button>
+      <button type="button" class="preset-btn" onclick="loadPreset('loyalEnterprise')">🛡️ Loyal Enterprise</button>
+      <button type="button" class="preset-btn" onclick="loadPreset('budgetBasic')">✨ Budget Basic</button>
+    </div>
+
+    <!-- Main Workbench Grid -->
+    <div class="workbench-grid">
+
+      <!-- Left Column: Input Form -->
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <h2 class="card-title">Customer Attribute Simulator</h2>
+            <p class="card-desc">Adjust subscriber parameters to evaluate real-time churn propensity</p>
+          </div>
+        </div>
+
+        <form id="churnForm">
+          <!-- 1. Demographics -->
+          <div class="form-section">
+            <span class="section-legend">1. Customer Demographics</span>
+            <div class="form-grid-2">
+              <div class="form-group">
+                <label class="form-label" for="gender">Gender</label>
+                <select id="gender" name="gender" class="form-control">
+                  <option value="Female">Female</option>
+                  <option value="Male" selected>Male</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="SeniorCitizen">Senior Citizen</label>
+                <select id="SeniorCitizen" name="SeniorCitizen" class="form-control">
+                  <option value="0" selected>No (0)</option>
+                  <option value="1">Yes (1)</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="Partner">Partner</label>
+                <select id="Partner" name="Partner" class="form-control">
+                  <option value="No" selected>No</option>
+                  <option value="Yes">Yes</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="Dependents">Dependents</label>
+                <select id="Dependents" name="Dependents" class="form-control">
+                  <option value="No" selected>No</option>
+                  <option value="Yes">Yes</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- 2. Account & Billing -->
+          <div class="form-section">
+            <span class="section-legend">2. Account & Contract Commitment</span>
+            <div class="form-group">
+              <div class="slider-header">
+                <label class="form-label" for="tenure" style="margin-bottom:0;">Tenure (Months)</label>
+                <span class="slider-val"><span id="tenureVal">2</span> months</span>
+              </div>
+              <input type="range" id="tenure" name="tenure" min="0" max="72" value="2">
+            </div>
+
+            <div class="form-grid-2">
+              <div class="form-group">
+                <label class="form-label" for="Contract">Contract Type</label>
+                <select id="Contract" name="Contract" class="form-control">
+                  <option value="Month-to-month" selected>Month-to-month</option>
+                  <option value="One year">One year</option>
+                  <option value="Two year">Two year</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="PaperlessBilling">Paperless Billing</label>
+                <select id="PaperlessBilling" name="PaperlessBilling" class="form-control">
+                  <option value="Yes" selected>Yes</option>
+                  <option value="No">No</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="PaymentMethod">Payment Method</label>
+              <select id="PaymentMethod" name="PaymentMethod" class="form-control">
+                <option value="Electronic check" selected>Electronic check (High Attrition)</option>
+                <option value="Mailed check">Mailed check</option>
+                <option value="Bank transfer (automatic)">Bank transfer (automatic)</option>
+                <option value="Credit card (automatic)">Credit card (automatic)</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- 3. Subscribed Services -->
+          <div class="form-section">
+            <span class="section-legend">3. Telecom & Digital Services</span>
+            <div class="form-grid-2">
+              <div class="form-group">
+                <label class="form-label" for="PhoneService">Phone Service</label>
+                <select id="PhoneService" name="PhoneService" class="form-control">
+                  <option value="Yes" selected>Yes</option>
+                  <option value="No">No</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="MultipleLines">Multiple Lines</label>
+                <select id="MultipleLines" name="MultipleLines" class="form-control">
+                  <option value="No" selected>No</option>
+                  <option value="Yes">Yes</option>
+                  <option value="No phone service">No phone service</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="InternetService">Internet Service</label>
+              <select id="InternetService" name="InternetService" class="form-control">
+                <option value="Fiber optic" selected>Fiber optic (Fast / High Churn)</option>
+                <option value="DSL">DSL (Moderate)</option>
+                <option value="No">No Internet Service</option>
+              </select>
+            </div>
+
+            <div class="form-grid-3">
+              <div class="form-group">
+                <label class="form-label" for="OnlineSecurity">Online Security</label>
+                <select id="OnlineSecurity" name="OnlineSecurity" class="form-control">
+                  <option value="No" selected>No</option>
+                  <option value="Yes">Yes</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="OnlineBackup">Online Backup</label>
+                <select id="OnlineBackup" name="OnlineBackup" class="form-control">
+                  <option value="No" selected>No</option>
+                  <option value="Yes">Yes</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="DeviceProtection">Device Protection</label>
+                <select id="DeviceProtection" name="DeviceProtection" class="form-control">
+                  <option value="No" selected>No</option>
+                  <option value="Yes">Yes</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="TechSupport">Tech Support</label>
+                <select id="TechSupport" name="TechSupport" class="form-control">
+                  <option value="No" selected>No</option>
+                  <option value="Yes">Yes</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="StreamingTV">Streaming TV</label>
+                <select id="StreamingTV" name="StreamingTV" class="form-control">
+                  <option value="Yes" selected>Yes</option>
+                  <option value="No">No</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="StreamingMovies">Streaming Movies</label>
+                <select id="StreamingMovies" name="StreamingMovies" class="form-control">
+                  <option value="Yes" selected>Yes</option>
+                  <option value="No">No</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- 4. Financials -->
+          <div class="form-section">
+            <span class="section-legend">4. Financial Metrics</span>
+            <div class="form-group">
+              <div class="slider-header">
+                <label class="form-label" for="MonthlyCharges" style="margin-bottom:0;">Monthly Charges ($)</label>
+                <span class="slider-val">$<span id="monthlyVal">89.50</span>/mo</span>
+              </div>
+              <input type="range" id="MonthlyCharges" name="MonthlyCharges" min="18" max="120" step="0.25" value="89.50">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="TotalCharges">Total Lifetime Charges ($)</label>
+              <input type="number" step="0.01" id="TotalCharges" name="TotalCharges" class="form-control" value="179.00">
+            </div>
+          </div>
+
+          <button type="submit" id="predictBtn" class="btn-primary">
+            <span>Run Prediction</span>
+          </button>
+        </form>
+      </div>
+
+      <!-- Right Column: Results & Explainability -->
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <h2 class="card-title">Real-Time Risk Diagnosis</h2>
+            <p class="card-desc">Machine Learning inference & prescriptive insights</p>
+          </div>
+        </div>
+
+        <div class="result-box">
+          <div class="risk-dial">
+            <svg class="dial-circle" width="180" height="180">
+              <circle class="dial-bg" cx="90" cy="90" r="70" />
+              <circle id="dialProgress" class="dial-progress" cx="90" cy="90" r="70" />
+            </svg>
+            <div class="dial-text">
+              <span id="dialPercent" class="dial-percent">--%</span>
+              <span class="dial-label">Probability</span>
+            </div>
+          </div>
+
+          <div id="riskBadge" class="risk-badge medium">Medium Risk</div>
+          <div id="predictionLabel" class="prediction-label-text">Calculating...</div>
+          <div id="dbStatus" class="db-status-pill">
+            <span>Ready</span>
+          </div>
+        </div>
+
+        <!-- Factor Drivers -->
+        <div class="form-section">
+          <span class="section-legend">Key Risk & Retention Drivers</span>
+          <div id="factorsContainer">
+            <p style="font-size: 0.8rem; color: var(--text-muted);">Adjust attributes to compute factors.</p>
+          </div>
+        </div>
+
+        <!-- Prescriptive Retention Playbook -->
+        <div class="form-section">
+          <span class="section-legend">Recommended Retention Playbook</span>
+          <div id="actionsContainer">
+            <p style="font-size: 0.8rem; color: var(--text-muted);">Playbook actions will appear here.</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Batch Portfolio Analysis (CSV Upload) -->
+    <div id="batch" class="card" style="margin-top: 2.5rem;">
+      <div class="card-header">
+        <div>
+          <h2 class="card-title">Batch Customer Risk Analysis</h2>
+          <p class="card-desc">Upload a customer CSV spreadsheet for high-throughput batch scoring, risk segmentation, and export</p>
+        </div>
+        <a href="/api/sample-csv" class="preset-btn" style="text-decoration:none; padding: 0.5rem 1rem;">
+          📥 Download Sample CSV
+        </a>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+        <div>
+          <form id="batchForm" enctype="multipart/form-data">
+            <div class="form-group">
+              <label class="form-label" for="batchFile">Select CSV File (Telco Customer Dataset schema):</label>
+              <input type="file" id="batchFile" name="file" accept=".csv" class="form-control" style="padding: 0.5rem;" required>
+            </div>
+            <button type="submit" id="batchBtn" class="btn-primary" style="margin-top: 1rem;">
+              <span>Upload & Analyze Batch</span>
+            </button>
+          </form>
+        </div>
+
+        <div id="batchResults" style="display: none;">
+          <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 1rem;">
+            <div class="kpi-card" style="padding: 0.85rem; text-align: center;">
+              <div class="kpi-title" style="justify-content: center;">Total Rows</div>
+              <div id="batchTotal" class="kpi-value" style="font-size: 1.4rem;">0</div>
+            </div>
+            <div class="kpi-card" style="padding: 0.85rem; text-align: center;">
+              <div class="kpi-title" style="justify-content: center; color: #f87171;">High Risk</div>
+              <div id="batchHigh" class="kpi-value" style="font-size: 1.4rem; color: #f87171;">0</div>
+            </div>
+            <div class="kpi-card" style="padding: 0.85rem; text-align: center;">
+              <div class="kpi-title" style="justify-content: center; color: #fbbf24;">Churners</div>
+              <div id="batchChurners" class="kpi-value" style="font-size: 1.4rem; color: #fbbf24;">0</div>
+            </div>
+          </div>
+          <button type="button" id="downloadBatchCsvBtn" class="btn-primary" style="background: linear-gradient(135deg, #10b981, #059669);">
+            <span>📥 Download Scored CSV File</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Model Metrics & Comparison Section -->
+    <div id="metrics" class="card" style="margin-top: 2.5rem;">
+      <div class="card-header">
+        <div>
+          <h2 class="card-title">Model Performance & Evaluation Artifacts</h2>
+          <p class="card-desc">Rigorous 5-fold cross-validation and test set benchmarks across 6 classifiers</p>
+        </div>
+        <a href="/api/export" class="preset-btn" style="text-decoration:none; padding: 0.5rem 1rem;">Export Predictions (CSV)</a>
+      </div>
+
+      <!-- Comparison Table -->
+      <div class="table-container">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Classifier Model</th>
+              <th>CV ROC-AUC (Mean ± Std)</th>
+              <th>Test ROC-AUC</th>
+              <th>Test PR-AUC</th>
+              <th>Test Recall</th>
+              <th>Test Precision</th>
+              <th>Test F1</th>
+              <th>Test Accuracy</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for m in metadata.get('all_model_comparison', []) %}
+            <tr style="{% if m['Model'] == metadata.get('model_name') %}font-weight: bold; background: rgba(99, 102, 241, 0.08);{% endif %}">
+              <td style="color: #fff;">
+                {% if m['Model'] == metadata.get('model_name') %}★ {% endif %}{{ m['Model'] }}
+              </td>
+              <td>{{ m.get('CV ROC-AUC (Mean)') }} ± {{ m.get('CV ROC-AUC (Std)') }}</td>
+              <td style="color: #34d399; font-weight: 600;">{{ m.get('Test ROC-AUC') }}</td>
+              <td>{{ m.get('Test PR-AUC') }}</td>
+              <td style="color: #fbbf24;">{{ m.get('Test Recall') }}</td>
+              <td>{{ m.get('Test Precision') }}</td>
+              <td>{{ m.get('Test F1') }}</td>
+              <td>{{ m.get('Test Accuracy') }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Evaluation Figures Carousel / Grid -->
+      <div class="figures-grid">
+        <div class="figure-box">
+          <img src="/reports/figures/01_confusion_matrix.png" alt="Confusion Matrix" loading="lazy">
+          <div class="figure-title">01. Test Confusion Matrix</div>
+        </div>
+        <div class="figure-box">
+          <img src="/reports/figures/02_roc_curves.png" alt="ROC Curves Comparison" loading="lazy">
+          <div class="figure-title">02. ROC Curves Comparison</div>
+        </div>
+        <div class="figure-box">
+          <img src="/reports/figures/03_precision_recall_curves.png" alt="Precision-Recall Curves" loading="lazy">
+          <div class="figure-title">03. Precision-Recall Curves</div>
+        </div>
+        <div class="figure-box">
+          <img src="/reports/figures/04_feature_importance.png" alt="Feature Importance Drivers" loading="lazy">
+          <div class="figure-title">04. Feature Importance Drivers</div>
+        </div>
+        <div class="figure-box">
+          <img src="/reports/figures/05_threshold_tuning.png" alt="Threshold Optimization Curve" loading="lazy">
+          <div class="figure-title">05. Threshold Optimization Curve</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>

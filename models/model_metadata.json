@@ -1,0 +1,142 @@
+{
+  "model_name": "Gradient Boosting",
+  "model_version": "1.0.0",
+  "trained_at": "2026-10-09T01:36:37.867637",
+  "optimal_threshold": 0.3594,
+  "default_threshold": 0.45,
+  "python_version": "3.14.5",
+  "scikit_learn_version": "1.9.0",
+  "dataset_rows": 7043,
+  "feature_count": 30,
+  "test_metrics": {
+    "accuracy": 0.7799858055358411,
+    "precision": 0.5711111111111111,
+    "recall": 0.6871657754010695,
+    "f1": 0.6237864077669902,
+    "roc_auc": 0.8441060218553824,
+    "pr_auc": 0.659912115620412,
+    "threshold": 0.3593818020948176
+  },
+  "all_model_comparison": [
+    {
+      "Model": "Gradient Boosting",
+      "CV ROC-AUC (Mean)": 0.8488,
+      "CV ROC-AUC (Std)": 0.0111,
+      "CV Recall (Mean)": 0.5304,
+      "CV F1 (Mean)": 0.5916,
+      "Test ROC-AUC": 0.8441,
+      "Test PR-AUC": 0.6599,
+      "Test Accuracy": 0.802,
+      "Test Precision": 0.6346,
+      "Test Recall": 0.5989,
+      "Test F1": 0.6162
+    },
+    {
+      "Model": "Random Forest",
+      "CV ROC-AUC (Mean)": 0.8473,
+      "CV ROC-AUC (Std)": 0.0109,
+      "CV Recall (Mean)": 0.7886,
+      "CV F1 (Mean)": 0.6306,
+      "Test ROC-AUC": 0.8441,
+      "Test PR-AUC": 0.6561,
+      "Test Accuracy": 0.7324,
+      "Test Precision": 0.4976,
+      "Test Recall": 0.8396,
+      "Test F1": 0.6249
+    },
+    {
+      "Model": "Logistic Regression",
+      "CV ROC-AUC (Mean)": 0.8459,
+      "CV ROC-AUC (Std)": 0.0124,
+      "CV Recall (Mean)": 0.8013,
+      "CV F1 (Mean)": 0.6296,
+      "Test ROC-AUC": 0.8419,
+      "Test PR-AUC": 0.6344,
+      "Test Accuracy": 0.7197,
+      "Test Precision": 0.4838,
+      "Test Recall": 0.8369,
+      "Test F1": 0.6131
+    },
+    {
+      "Model": "AdaBoost",
+      "CV ROC-AUC (Mean)": 0.8451,
+      "CV ROC-AUC (Std)": 0.0122,
+      "CV Recall (Mean)": 0.4495,
+      "CV F1 (Mean)": 0.5414,
+      "Test ROC-AUC": 0.8408,
+      "Test PR-AUC": 0.6507,
+      "Test Accuracy": 0.7715,
+      "Test Precision": 0.5573,
+      "Test Recall": 0.6765,
+      "Test F1": 0.6111
+    },
+    {
+      "Model": "HistGradientBoosting",
+      "CV ROC-AUC (Mean)": 0.8359,
+      "CV ROC-AUC (Std)": 0.0109,
+      "CV Recall (Mean)": 0.7284,
+      "CV F1 (Mean)": 0.6247,
+      "Test ROC-AUC": 0.8365,
+      "Test PR-AUC": 0.6436,
+      "Test Accuracy": 0.7473,
+      "Test Precision": 0.5158,
+      "Test Recall": 0.7834,
+      "Test F1": 0.6221
+    },
+    {
+      "Model": "Decision Tree",
+      "CV ROC-AUC (Mean)": 0.825,
+      "CV ROC-AUC (Std)": 0.0091,
+      "CV Recall (Mean)": 0.7846,
+      "CV F1 (Mean)": 0.603,
+      "Test ROC-AUC": 0.8298,
+      "Test PR-AUC": 0.6009,
+      "Test Accuracy": 0.7119,
+      "Test Precision": 0.4761,
+      "Test Recall": 0.8529,
+      "Test F1": 0.6111
+    }
+  ],
+  "top_features": [
+    {
+      "feature": "SeniorCitizen",
+      "weight": 0.26958973979414147
+    },
+    {
+      "feature": "InternetService_Fiber optic",
+      "weight": 0.16530293687398712
+    },
+    {
+      "feature": "PaymentMethod_Electronic check",
+      "weight": 0.11718677118331537
+    },
+    {
+      "feature": "MonthlyCharges",
+      "weight": 0.10160984505045775
+    },
+    {
+      "feature": "Contract_Two year",
+      "weight": 0.07397297976630714
+    },
+    {
+      "feature": "tenure",
+      "weight": 0.07305878105850756
+    },
+    {
+      "feature": "Contract_One year",
+      "weight": 0.05691056887779631
+    },
+    {
+      "feature": "PaperlessBilling_Yes",
+      "weight": 0.024384931031174645
+    },
+    {
+      "feature": "OnlineSecurity_Yes",
+      "weight": 0.014883546053668211
+    },
+    {
+      "feature": "TechSupport_Yes",
+      "weight": 0.012811414974228661
+    }
+  ]
+}

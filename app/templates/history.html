@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Prediction History | ChurnGuard AI</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <!-- Top Navigation -->
+  <nav class="navbar">
+    <a href="/" class="brand">
+      <span class="brand-badge">PROD ML</span>
+      <span>ChurnGuard AI</span>
+    </a>
+    <div class="nav-links">
+      <a href="/" class="nav-link">Simulator</a>
+      <a href="/history" class="nav-link active">Prediction History</a>
+      <a href="/#metrics" class="nav-link">Model Metrics</a>
+      <div class="health-pill">
+        <span class="health-dot"></span>
+        <span>Database Connected</span>
+      </div>
+    </div>
+  </nav>
+
+  <div class="main-content">
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <h2 class="card-title">Prediction Event Audit Log</h2>
+          <p class="card-desc">Chronological database record of all inferenced customer profiles and decisions</p>
+        </div>
+        <div style="display: flex; gap: 0.75rem;">
+          <a href="/api/export" class="preset-btn" style="text-decoration:none; padding: 0.6rem 1.2rem; background: var(--primary); color: #fff; border: none;">
+            Download CSV
+          </a>
+          <a href="/" class="preset-btn" style="text-decoration:none; padding: 0.6rem 1.2rem;">
+            ← Back to Simulator
+          </a>
+        </div>
+      </div>
+
+      <!-- Filters & Search -->
+      <div style="display: flex; gap: 1rem; margin-bottom: 1.25rem; flex-wrap: wrap;">
+        <input type="text" id="searchInput" placeholder="Search by Contract, Label, or ID..." class="form-control" style="max-width: 320px;">
+        <select id="filterRisk" class="form-control" style="max-width: 180px;">
+          <option value="ALL">All Risk Levels</option>
+          <option value="High">High Risk</option>
+          <option value="Medium">Medium Risk</option>
+          <option value="Low">Low Risk</option>
+        </select>
+      </div>
+
+      <!-- Predictions Table -->
+      <div class="table-container">
+        <table class="data-table" id="historyTable">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Timestamp</th>
+              <th>Tenure</th>
+              <th>Contract</th>
+              <th>Monthly Charges</th>
+              <th>Total Charges</th>
+              <th>Churn Prob</th>
+              <th>Risk Level</th>
+              <th>Prediction</th>
+              <th>Model Name</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% if predictions and predictions | length > 0 %}
+              {% for p in predictions %}
+              <tr class="history-row" data-risk="{{ p.risk_level }}">
+                <td>#{{ p.id }}</td>
+                <td style="font-size: 0.78rem;">{{ p.created_at }}</td>
+                <td>{{ p.tenure }} mo</td>
+                <td>{{ p.contract }}</td>
+                <td>${{ "%.2f" | format(p.monthly_charges | float) }}</td>
+                <td>${{ "%.2f" | format(p.total_charges | float) }}</td>
+                <td style="font-weight: 700; color: {% if (p.churn_probability | float) >= 0.65 %}#f87171{% elif (p.churn_probability | float) >= 0.35 %}#fbbf24{% else %}#34d399{% endif %};">
+                  {{ "%.1f" | format((p.churn_probability | float) * 100) }}%
+                </td>
+                <td>
+                  <span class="factor-badge {% if p.risk_level == 'High' %}risk{% elif p.risk_level == 'Medium' %}medium{% else %}anchor{% endif %}">
+                    {{ p.risk_level }}
+                  </span>
+                </td>
+                <td style="font-weight: 600; color: {% if p.prediction_label == 'Likely to churn' %}#f87171{% else %}#34d399{% endif %};">
+                  {{ p.prediction_label }}
+                </td>
+                <td style="font-size: 0.75rem; color: var(--text-muted);">{{ p.model_name }}</td>
+              </tr>
+              {% endfor %}
+            {% else %}
+              <tr>
+                <td colspan="10" style="text-align: center; padding: 2.5rem; color: var(--text-muted);">
+                  No predictions recorded yet. Run a prediction in the Simulator to generate audit logs!
+                </td>
+              </tr>
+            {% endif %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const searchInput = document.getElementById("searchInput");
+      const filterRisk = document.getElementById("filterRisk");
+      const rows = document.querySelectorAll(".history-row");
+
+      function filterTable() {
+        const query = searchInput.value.toLowerCase();
+        const risk = filterRisk.value;
+
+        rows.forEach(row => {
+          const text = row.innerText.toLowerCase();
+          const rowRisk = row.getAttribute("data-risk");
+          const matchesQuery = text.includes(query);
+          const matchesRisk = (risk === "ALL" || rowRisk === risk);
+
+          if (matchesQuery && matchesRisk) {
+            row.style.display = "";
+          } else {
+            row.style.display = "none";
+          }
+        });
+      }
+
+      if (searchInput) searchInput.addEventListener("input", filterTable);
+      if (filterRisk) filterRisk.addEventListener("change", filterTable);
+    });
+  </script>
+</body>
+</html>
