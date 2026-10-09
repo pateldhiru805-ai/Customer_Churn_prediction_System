@@ -1,21 +1,21 @@
 {
   "model_name": "Gradient Boosting",
-  "model_version": "1.0.0",
-  "trained_at": "2026-10-09T01:36:37.867637",
-  "optimal_threshold": 0.3594,
+  "model_version": "1.1.0",
+  "trained_at": "2026-10-09T15:03:35.123205",
+  "optimal_threshold": 0.2744,
   "default_threshold": 0.45,
   "python_version": "3.14.5",
   "scikit_learn_version": "1.9.0",
   "dataset_rows": 7043,
   "feature_count": 30,
   "test_metrics": {
-    "accuracy": 0.7799858055358411,
-    "precision": 0.5711111111111111,
-    "recall": 0.6871657754010695,
-    "f1": 0.6237864077669902,
+    "accuracy": 0.7487579843860894,
+    "precision": 0.5177935943060499,
+    "recall": 0.7780748663101604,
+    "f1": 0.6217948717948718,
     "roc_auc": 0.8441060218553824,
     "pr_auc": 0.659912115620412,
-    "threshold": 0.3593818020948176
+    "threshold": 0.27444868879904066
   },
   "all_model_comparison": [
     {
