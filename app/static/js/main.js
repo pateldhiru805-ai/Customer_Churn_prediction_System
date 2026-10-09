@@ -265,11 +265,17 @@ document.addEventListener("DOMContentLoaded", () => {
         data.risk_factors.forEach((f) => {
           const div = document.createElement("div");
           div.className = "factor-card";
+          const meterWidth = f.impact.includes("High") ? "85%" : f.impact.includes("Moderate") ? "60%" : "40%";
           div.innerHTML = `
-            <span class="factor-badge ${f.type}">${f.impact}</span>
-            <div>
-              <strong style="color: #fff; font-size: 0.82rem;">${f.feature}:</strong>
-              <span style="color: var(--text-secondary); font-size: 0.8rem;"> ${f.description}</span>
+            <div style="flex: 1;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.25rem;">
+                <strong style="color: #fff; font-size: 0.82rem;">${f.feature}</strong>
+                <span class="factor-badge ${f.type}">${f.impact}</span>
+              </div>
+              <span style="color: var(--text-secondary); font-size: 0.78rem;">${f.description}</span>
+              <div class="factor-meter-bg">
+                <div class="factor-meter-fill ${f.type}" style="width: ${meterWidth};"></div>
+              </div>
             </div>
           `;
           factorsContainer.appendChild(div);

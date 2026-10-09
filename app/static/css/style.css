@@ -606,3 +606,55 @@ input[type="range"] {
   border-top: 1px solid var(--border-color);
   background: var(--bg-card);
 }
+
+/* Factor Meter & Visual Progress */
+.factor-meter-bg {
+  width: 100%;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 2px;
+  margin-top: 0.35rem;
+  overflow: hidden;
+}
+
+.factor-meter-fill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 0.4s ease;
+}
+
+.factor-meter-fill.risk {
+  background: #f87171;
+}
+
+.factor-meter-fill.anchor {
+  background: #34d399;
+}
+
+/* Executive Print / PDF Dossier Styling */
+@media print {
+  body {
+    background: #fff !important;
+    color: #000 !important;
+  }
+  .navbar, .presets-bar, #batch, #metrics, .btn-primary, #predictBtn, .slider-container input, form {
+    display: none !important;
+  }
+  .workbench-grid {
+    grid-template-columns: 1fr !important;
+  }
+  .card {
+    border: 1px solid #ccc !important;
+    background: #fff !important;
+    box-shadow: none !important;
+    color: #000 !important;
+  }
+  .card-title, .prediction-label-text, .dial-percent, strong {
+    color: #000 !important;
+  }
+  .factor-card, .action-card {
+    background: #f9f9f9 !important;
+    border: 1px solid #ddd !important;
+    color: #000 !important;
+  }
+}
